@@ -59,6 +59,14 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 torch.manual_seed(42)
 ```
 
+3. **Prepare the IMDB dataset** (you'll reuse this for both Task 2 and Task 3):
+   - Load IMDB (or the CSV fallback) and reduce to **5000 samples** for speed.
+   - Tokenise reviews: split on whitespace and lowercase. (Optionally use `torchtext.data.utils.get_tokenizer("basic_english")`.)
+   - Build a vocabulary from the training tokens, keeping the **top 10 000 most frequent**. Reserve indices 0 and 1 for `<pad>` and `<unk>`.
+   - Convert each review to a list of integer indices, padded/truncated to **max length 200**.
+   - Wrap the encoded data in a custom `Dataset` and create train/val `DataLoader`s with batch size 32.
+   - Print the encoding of one short review so you can see what the model will see.
+
 ## Tasks
 
 ### Task 1 — Implement Scaled Dot-Product Attention from Scratch
@@ -72,16 +80,7 @@ Before using PyTorch's built-in attention, build your own.
 3. Verify your implementation matches `nn.functional.scaled_dot_product_attention` (or do a manual check that softmax rows sum to 1 and outputs match `weights @ V`).
 4. Print the attention weight matrix for one example. In a markdown cell, comment on its shape and what each row represents.
 
-### Task 2 — Build a Vocabulary and Encode Text
-
-1. Load the IMDB dataset (or the CSV fallback). Reduce to **5000 samples** for speed.
-2. Tokenise reviews: split on whitespace and lowercase. (Optionally use `torchtext.data.utils.get_tokenizer("basic_english")`.)
-3. Build a vocabulary from the training tokens, keeping the **top 10 000 most frequent**. Reserve indices 0 and 1 for `<pad>` and `<unk>`.
-4. Convert each review to a list of integer indices, padded/truncated to **max length 200**.
-5. Wrap the encoded data in a custom `Dataset` and create train/val `DataLoader`s with batch size 32.
-6. Print the encoding of one short review so you can see what the model will see.
-
-### Task 3 — LSTM Classifier
+### Task 2 — LSTM Classifier
 
 1. Define an `LSTMClassifier`:
    - `nn.Embedding(vocab_size, embed_dim=64)`
@@ -91,7 +90,7 @@ Before using PyTorch's built-in attention, build your own.
 2. Train for **5 epochs** with `Adam(lr=1e-3)` and `CrossEntropyLoss`. Time the training with `time.time()`.
 3. Plot training and validation loss + accuracy. Report best validation accuracy and total training time.
 
-### Task 4 — Small Transformer Classifier
+### Task 3 — Small Transformer Classifier
 
 Build a transformer encoder for the same task.
 
@@ -104,29 +103,20 @@ Build a transformer encoder for the same task.
 2. Train for the same **5 epochs** with the same optimiser and loss. Time the training.
 3. Plot training and validation loss + accuracy. Report best validation accuracy and total training time.
 
-### Task 5 — LSTM vs Transformer Comparison
+### Task 4 — LSTM vs Transformer Comparison
 
 In a markdown cell, fill in this table and write a 4–6 sentence comparison:
 
 | Model | Best val accuracy | Total training time | Parameter count |
 |---|---|---|---|
-| LSTM (Task 3) | … | … | … |
-| Transformer (Task 4) | … | … | … |
+| LSTM (Task 2) | … | … | … |
+| Transformer (Task 3) | … | … | … |
 
 Your comparison should touch on:
 
 - Which converged faster per epoch?
 - Which finished with higher accuracy?
 - Did the transformer's parallelism noticeably affect training time on your hardware?
-
-### Task 6 — Visualise Attention (Stretch)
-
-This task is optional but enlightening.
-
-1. Take one validation review and forward it through your transformer.
-2. Use forward hooks to capture attention weights from one head of the first encoder layer.
-3. Visualise the attention weights as a heatmap: rows = query positions (tokens), columns = key positions (tokens). Annotate the axes with the actual tokens (use the words, not indices).
-4. In a markdown cell, comment on whether the attention pattern looks meaningful — do important sentiment words receive more attention?
 
 ## Submission
 
@@ -136,12 +126,12 @@ This task is optional but enlightening.
 
 ### Definition of done (checklist)
 
+- [ ] Tokeniser, vocabulary, and encoded dataset built in the setup.
 - [ ] From-scratch scaled dot-product attention implemented and verified.
-- [ ] Tokeniser, vocabulary, and encoded dataset built.
 - [ ] LSTM classifier trained with curves and timing.
 - [ ] Transformer classifier trained with curves and timing.
 - [ ] Comparison table with parameter counts, accuracy, and training time.
-- [ ] At least one markdown reflection per major task.
+- [ ] At least one markdown reflection per task.
 - [ ] `Kernel → Restart & Run All` produces no errors.
 
 ### How to submit (Git workflow)
@@ -152,4 +142,4 @@ git commit -m "lab: complete sequence models and transformers"
 git push origin main
 ```
 
-Then open a **Pull Request** on the original repository describing your comparison and any surprises in the attention visualisation.
+Then open a **Pull Request** on the original repository describing your comparison between the LSTM and the transformer.
